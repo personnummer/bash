@@ -51,51 +51,65 @@ valid() {
 # Get age returns the age of the last parsed/validated social security number.
 # If none is found this method return -1
 get_age() {
-  if [ "$__personnummer_year" = "" ]; then
-    echo "-1"
-  else
-    local year
-    local month
-    local day
-    local year_reduce=0
+  pnr="${1:-}"
 
-    read -r year month day <<< "$(date "+%Y %m %d")"
+  # If an argument is given we assume it's the personal identification number
+  # and thus parses it again to set all variables.
+  [ -n "$pnr" ] && __parse "$pnr"
 
-    local __personnummer_full_year=$(( __personnummer_century + __personnummer_year ))
-    if (( __personnummer_month >= month )) && (( __personnummer_day > day )); then
-      year_reduce=1
-    fi
+  local year
+  local month
+  local day
+  local year_reduce=0
 
-    echo $(( year - __personnummer_full_year - year_reduce ))
+  read -r year month day <<< "$(date "+%Y %m %d")"
+
+  local __personnummer_full_year=$(( __personnummer_century + __personnummer_year ))
+  if (( __personnummer_month >= month )) && (( __personnummer_day > day )); then
+    year_reduce=1
   fi
+
+  echo $(( year - __personnummer_full_year - year_reduce ))
 }
 
 # Returns 0 (exit code 0) if the last parsed social security number belongs to a
 # female.
 is_female() {
+  pnr="${1:-}"
+
+  # If an argument is given we assume it's the personal idefnitifaction number
+  # and thus parses it again to set all variables.
+  [ -n "$pnr" ] && __parse "$pnr"
+
   local third_digit=$(( __personnummer_serial % 10))
 
   if (( third_digit % 2 == 0 )); then
     return 0
-  else
-    return 1
   fi
+
+  return 1
 }
 
 # Returns 0 (exit code 0) if the last parsed social security number belongs to a
 # male.
 is_male() {
-  if ! is_female; then
+  if ! is_female "${1:-}"; then
     return 0
-  else
-    return 1
   fi
+
+  return 1
 }
 
 # Returns 0 (exit code 0) if the last parsed social security number is a
 # coordination number.
 is_coordination_number() {
-  if [ "$__personnummer_day_or_coordination" -gt 31 ]; then
+  pnr="${1:-}"
+
+  # If an argument is given we assume it's the personal idefnitifaction number
+  # and thus parses it again to set all variables.
+  [ -n "$pnr" ] && __parse "$pnr"
+
+  if [ "${__personnummer_day_or_coordination#0}" -gt 31 ]; then
     return 0
   fi
 
@@ -109,6 +123,18 @@ is_coordination_number() {
 # shellcheck disable=SC2120
 # Might be used externally
 format() {
+  # If there's only one argument it can be either the "boolean" to format as
+  # long or the personal identification number. If the length of the argument is
+  # one we assume it's a boolean and doesn't do any new parsing. If it's greater
+  # than 1 however we assume it's a personal identification number and parses it
+  # again after shifting the argument.
+  if [ $# -eq 1 ] && [ ${#1} -gt 1 ] || [ $# -eq 2 ]; then
+    pnr="${1:-}"
+    shift
+
+    __parse "$pnr"
+  fi
+
   want_long="${1:-}"
 
   long=$(
@@ -129,9 +155,9 @@ format() {
 
 
 __parse() {
-  pnr="$1"
+  pnr="${1:-}"
 
-  # Always clear what's last parsed when trying to parse again.
+  # Always clear what's last parsed when trying to parse agai
   __clear_all
 
   if [ -z "$pnr" ]; then
@@ -139,23 +165,23 @@ __parse() {
   fi
 
   regex="^([0-9]{2}){0,1}([0-9]{2})([0-9]{2})([0-9]{2})([-|+]{0,1})([0-9]{3})([0-9]{0,1})$"
+
   if [[ $pnr =~ $regex ]]; then
     __personnummer_century=$(( "${BASH_REMATCH[1]:-19}" * 100 ))
     __personnummer_year="${BASH_REMATCH[2]}"
-    __personnummer_month=$(printf "%02d" "${BASH_REMATCH[3]#0}")
+    __personnummer_month="${BASH_REMATCH[3]}"
     __personnummer_day=$(printf "%02d" $(( "${BASH_REMATCH[4]#0}" % 60 )))
     __personnummer_day_or_coordination="${BASH_REMATCH[4]}"
     __personnummer_serial="${BASH_REMATCH[6]}"
     __personnummer_control="${BASH_REMATCH[7]}"
 
-        # shellcheck disable=SC2034
-        # This might be used in the future
-        __personnummer_separator="${BASH_REMATCH[5]}"
-      else
-        return 1
+    # shellcheck disable=SC2034
+    # This might be used in the future
+    __personnummer_separator="${BASH_REMATCH[5]}"
+  else
+    return 1
   fi
 
-  # TODO: Use BSD date for macOS
   local date=""
   date="$(
     printf "%d%02d%02d" \
@@ -164,19 +190,39 @@ __parse() {
       "${__personnummer_day#0}"
     )"
 
-  if ! gdate "+%Y%m%d" -d "$date" > /dev/null 2>&1; then
-        return 1
+  if ! __valid_date "$date"; then
+    return 1
   fi
 
   return 0
 }
 
-__luhn() {
-  local series="$1"
-  local sum=0
-  even=1
+__valid_date() {
+  local date="${1:-}"
 
-  for digit in $(echo "$series" | gsed -e 's/\(.\)/\1\n/g'); do
+  if [ "$(uname -s)" = "Darwin" ]; then
+    date_result="$(date -jf"%Y%m%d" "$date" "+%Y%m%d" 2> /dev/null)"
+
+    if [ "$date_result" = "$date" ]; then
+      return 0
+    fi
+  else
+    if gdate "+%Y%m%d" -d "$date" > /dev/null 2>&1; then
+      return 0
+    fi
+  fi
+
+  return 1
+}
+
+__luhn() {
+  local series="${1:-}"
+  local sum=0
+  local even=1
+
+  while read -r -n 1 digit; do
+    [ "$digit" = "" ] && continue
+
     if [ "$even" -eq 1 ]; then
       digit=$(( "$digit" * 2 ))
 
@@ -187,7 +233,7 @@ __luhn() {
 
     sum=$(( "$sum" + "$digit" ))
     even=$(( even^1 ))
-  done
+  done <<< "$series"
 
   __personnummer_checksum=$(( 10 - ( "$sum"  % 10 ) ))
   if [ "$__personnummer_checksum" -eq 10 ]; then
