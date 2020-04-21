@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches-ignore:
+      - 'wip-*'
+  pull_request: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Run the test suite
+      run: bash $GITHUB_WORKSPACE/unittest.sh
