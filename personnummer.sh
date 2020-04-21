@@ -207,7 +207,7 @@ __valid_date() {
       return 0
     fi
   else
-    if gdate "+%Y%m%d" -d "$date" > /dev/null 2>&1; then
+    if date "+%Y%m%d" -d "$date" > /dev/null 2>&1; then
       return 0
     fi
   fi
