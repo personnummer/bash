@@ -24,7 +24,7 @@ __clear_all() {
   __personnummer_separator=""
 }
 
-# Check if passed social security number is valid. Will ensure a valid date is
+# Check if passed personal identity number is valid. Will ensure a valid date is
 # passed and that the Luhn checksum is correct.
 valid() {
   pnr="${1:-}"
@@ -48,7 +48,7 @@ valid() {
   return 0
 }
 
-# Get age returns the age of the last parsed/validated social security number.
+# Get age returns the age of the last parsed/validated personal identity number.
 # If none is found this method return -1
 get_age() {
   pnr="${1:-}"
@@ -72,8 +72,8 @@ get_age() {
   echo $(( year - __personnummer_full_year - year_reduce ))
 }
 
-# Returns 0 (exit code 0) if the last parsed social security number belongs to a
-# female.
+# Returns 0 (exit code 0) if the last parsed personal identity number belongs to
+# a female.
 is_female() {
   pnr="${1:-}"
 
@@ -90,8 +90,8 @@ is_female() {
   return 1
 }
 
-# Returns 0 (exit code 0) if the last parsed social security number belongs to a
-# male.
+# Returns 0 (exit code 0) if the last parsed personal identity number belongs to
+# a male.
 is_male() {
   if ! is_female "${1:-}"; then
     return 0
@@ -100,7 +100,7 @@ is_male() {
   return 1
 }
 
-# Returns 0 (exit code 0) if the last parsed social security number is a
+# Returns 0 (exit code 0) if the last parsed personal identity number is a
 # coordination number.
 is_coordination_number() {
   pnr="${1:-}"
@@ -116,8 +116,8 @@ is_coordination_number() {
   return 1
 }
 
-# Format will echo a formatted version of the passed social security number. If
-# a true-ish argument is given it will be echoed in long format. Capture this
+# Format will echo a formatted version of the passed personal identity number.
+# If a true-ish argument is given it will be echoed in long format. Capture this
 # function to assign the output to a variable.
 #
 # shellcheck disable=SC2120

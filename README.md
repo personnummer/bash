@@ -1,6 +1,6 @@
 # bash-personnummer
 
-Validate Swedish [personal identification
+Validate Swedish [personal identity
 numbers](https://en.wikipedia.org/wiki/Personal_identity_number_(Sweden)) with
 [bash](https://www.gnu.org/software/bash/)
 
@@ -36,13 +36,13 @@ fi
 
 gender="$(is_female && echo "female" || echo "male")"
 
-printf "> The person with social security number %s is a %s of age %d\n" \
+printf "> The person with personal identity number %s is a %s of age %d\n" \
   "$(format)" "$gender" "$(get_age)"
 ```
 
 ```sh
 $ my_program.sh 19900101-0017
-> The person with social security number 900101-0017 is a male of age 30
+> The person with personal identity number 900101-0017 is a male of age 30
 ```
 
 **A more explicit way**
