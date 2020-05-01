@@ -15,13 +15,13 @@ _describe "Invalid last four digits"
       _assert _return_false
   done
 
-_describe "Valid social security numbers"
+_describe "Valid personal identity numbers"
   for tc in "19900101-0017" "196408233234" "000101-0107" "510818-9167" "19130401+2931"; do
     _test "Should be valid" valid $tc
       _assert _return_true
   done
 
-_describe "Formatting social security numbers"
+_describe "Formatting personal identity numbers"
   for tc in "19900101-0017" "9001010017" "900101+0017"; do
     __parse "$tc"
 
@@ -44,7 +44,7 @@ _describe "Formatting social security numbers"
       _assert _nth_arg_equals 1 1
   done
 
-_describe "Age from social security numbers"
+_describe "Age from personal identity numbers"
   year=""
   month=""
   day=""
@@ -66,7 +66,7 @@ _describe "Age from social security numbers"
       _assert _nth_arg_equals 0 "$pnr"
   done
 
-_describe "Valid gender for social security numbers"
+_describe "Valid gender for personal identity numbers"
   for tc in "19900101-0017 m" "19090903-6600 f" "800101-3294 m" "000903-6609 f" "800101+3294 m"; do
     read -r pnr gender <<< "$tc"
     __parse "$pnr"
@@ -85,7 +85,7 @@ _describe "Valid gender for social security numbers"
 
   done
 
-_describe "Valid coordination number for social security numbers"
+_describe "Valid coordination number for personal identity numbers"
   for tc in "800161-3294 1" "800101-3294 0" "640327-3813 0"; do
     read -r pnr coordination <<< "$tc"
     __parse "$pnr"
