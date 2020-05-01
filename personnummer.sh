@@ -65,7 +65,9 @@ get_age() {
   read -r year month day <<< "$(date "+%Y %m %d")"
 
   local __personnummer_full_year=$(( __personnummer_century + __personnummer_year ))
-  if (( __personnummer_month >= month )) && (( __personnummer_day > day )); then
+  if (( __personnummer_month >= month )); then
+    year_reduce=1
+  elif (( __personnummer_month == month )) && (( __personnummer_day > day )); then
     year_reduce=1
   fi
 
