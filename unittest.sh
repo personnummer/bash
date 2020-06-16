@@ -10,7 +10,7 @@ _describe "Invalid dates"
   done
 
 _describe "Invalid last four digits"
-  for tc in "19900101-1111" "20160229-1111" "6403273814"; do
+  for tc in "19900101-1111" "20160229-1111" "6403273814" "20150916-0006"; do
     _test "Should not be valid" valid $tc
       _assert _return_false
   done

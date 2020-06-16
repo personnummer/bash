@@ -33,6 +33,10 @@ valid() {
     return 1
   fi
 
+  if (( __personnummer_serial < 1 )); then
+    return 1
+  fi
+
   # shellcheck disable=SC2119
   # Not referencing "$@" here
   luhn_value=$(format | sed 's/-//')
