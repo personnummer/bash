@@ -65,11 +65,11 @@ _describe "Age from personal identity numbers"
     prev_month=12
   fi
 
-  tenty_next_month=$(printf "%d%02d%02d" $(( next_year - 20)) "${next_month#0}" 1 )
+  twenty_next_month=$(printf "%d%02d%02d" $(( next_year - 20)) "${next_month#0}" 1 )
   twenty_prev_month=$(printf "%d%02d%02d" $(( prev_year - 20 )) "${prev_month#0}" 1 )
   hundred=$(printf "%d%02d%02d" $(( "$year" - 100 )) 1 1)
 
-  for tc in "$tenty_next_month-1111 19" "$twenty_prev_month-2222 20" "$hundred-3333 100"; do
+  for tc in "$twenty_next_month-1111 19" "$twenty_prev_month-2222 20" "$hundred-3333 100"; do
     read -r pnr age <<< "$tc"
     __parse "$pnr"
 
