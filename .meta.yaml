@@ -1,0 +1,4 @@
+name: "Bash"
+maintainer: "@bombsimon"
+spec: 3.0
+workflow: "bash.yml"
