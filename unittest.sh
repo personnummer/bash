@@ -49,7 +49,7 @@ _describe "Age from personal identity numbers"
   month=""
   day=""
 
-  read -r year month day <<< "$(date "+%Y %m %d")"
+  read -r year month day <<< "$(date "+%Y %-m %-d")"
 
   next_year=$year
   next_month=$(( month + 1 ))
